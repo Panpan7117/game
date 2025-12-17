@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Веб-игра: Великий канал</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(#e8f3f6, #fdfefe);
+      color: #243333;
+    }
+    header {
+      background: linear-gradient(135deg, #2e5f73, #5fa6b8);
+      color: #fff;
+      padding: 18px;
+      text-align: center;
+    }
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* MAP */
+    .map {
+      position: relative;
+      height: 520px;
+      background: #e2f0f4;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    svg {
+      position: absolute;
+      inset: 0;
+    }
+
+    .node {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: white;
+      border: 4px solid #2e5f73;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 2;
+      transition: transform .25s, box-shadow .25s, opacity .25s;
+    }
+
+    .node.active {
+      box-shadow: 0 0 0 6px rgba(46,95,115,0.25);
+      animation: pulse 1.8s infinite;
+    }
+
+    .node.locked {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(46,95,115,.4);} 
+      70% { box-shadow: 0 0 0 16px rgba(46,95,115,0);} 
+      100% { box-shadow: 0 0 0 0 rgba(46,95,115,0);} 
+    }
+
+    .ship {
+      position: absolute;
+      font-size: 36px;
+      transition: top 1s ease, left 1s ease;
+      z-index: 3;
+    }
+
+    /* PANEL */
+    .panel {
+      margin-top: 20px;
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.1);
+    }
+
+    textarea {
+      width: 100%;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 14px;
+      background: #2e5f73;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #244c5c;
+    }
+  </style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start" style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#2e5f73,#5fa6b8); color:white; text-align:center; padding:40px;">
+  <div>
+    <h1 style="font-size:42px;">Испытания цаоюньского надзора</h1>
+    <p style="font-size:18px; max-width:600px; margin:auto;">Как доставить зерно из Ханчжоу в Чанъань по Великому каналу</p >
+    <button style="margin-top:30px; font-size:18px; padding:14px 28px;" onclick="startGame()">Начать игру</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game" style="display:none;">
+<header>
+  <h1>Испытания цаоюньского надзора</h1>
+  <p>Интерактивная учебная веб-игра</p >
+</header>
+
+<main>
+
+<div class="map">
+
+  <svg viewBox="0 0 1200 520" preserveAspectRatio="none">
+    <path d="M100 80 C 200 200, 400 50, 600 220 S 900 420, 1100 120" 
+          stroke="#5fa6b8" stroke-width="10" fill="none" stroke-dasharray="14 10" />
+  </svg>
+
+  <div class="ship" id="ship" style="top:70px; left:90px;">🚢</div>
+
+  <div class="node active" style="top:40px; left:40px;" onclick="openStage(0)">Ханчжоу</div>
+  <div class="node locked" style="top:160px; left:260px;" id="n1" onclick="openStage(1)">Дамбы</div>
+  <div class="node locked" style="top:80px; left:480px;" id="n2" onclick="openStage(2)">Провинция</div>
+  <div class="node locked" style="top:260px; left:700px;" id="n3" onclick="openStage(3)">Север</div>
+  <div class="node locked" style="top:80px; left:940px;" id="n4" onclick="openStage(4)">Чанъань</div>
+
+</div>
+
+<div class="panel" id="panel">
+  <h2>Начало путешествия</h2>
+  <p>Следуйте по Великому каналу и выполняйте управленческие задания.</p >
+</div>
+
+</main>
+</div>
+
+<!-- END SCREEN -->
+<div id="end" style="display:none; min-height:100vh; background:#eef6f8; padding:60px; text-align:center;">
+  <h1>Путешествие завершено</h1>
+  <p style="max-width:700px; margin:auto;">
+    Вы успешно смоделировали систему государственного управления перевозками зерна.
+    Обсудите, какие решения оказались наиболее эффективными.
+  </p >
+  <button onclick="location.reload()">Пройти ещё раз</button>
+</div>
+
+<!-- TEACHER INFO -->
+<div style="background:white; padding:40px;">
+  <h2>Информация для преподавателя</h2>
+  <ul>
+    <li><strong>Цель:</strong> формирование исторического и управленческого мышления</li>
+    <li><strong>Форма:</strong> учебная веб-игра, веб-квест</li>
+    <li><strong>Работа:</strong> индивидуально или в группах</li>
+    <li><strong>Обсуждение:</strong> после каждого этапа или в финале</li>
+  </ul>
+</div>
+
+<script>
+  function startGame(){
+    document.getElementById('start').style.display='none';
+    document.getElementById('game').style.display='block';
+  }
+</script>
+
+</body>
+</html>
